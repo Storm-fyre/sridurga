@@ -14,6 +14,7 @@
             --text-secondary: #7a5c6b;
             --accent-color: #f08a9d;
             --card-bg: rgba(255, 255, 255, 0.65);
+            --border-color: rgba(255, 255, 255, 0.8);
             --shadow-color: rgba(240, 138, 157, 0.2);
 
             /* Dynamic Background Gradient Variables */
@@ -70,7 +71,7 @@
         }
 
         .toast-card {
-            background: rgba(255, 255, 255, 0.85);
+            background: var(--card-bg);
             width: 100%;
             max-width: 500px;
             padding: 60px 40px;
@@ -78,10 +79,10 @@
             box-shadow: 0 20px 60px var(--shadow-color);
             position: relative;
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--border-color);
             box-sizing: border-box;
             animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            transition: box-shadow 1.5s ease;
+            transition: box-shadow 1.5s ease, background 1.5s ease, border-color 1.5s ease;
         }
 
         .toast-card h2 {
@@ -129,9 +130,9 @@
         }
 
         .color-bar {
-            background: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
             border-radius: 50px;
             display: flex;
             align-items: center;
@@ -139,7 +140,7 @@
             width: 90%;
             max-width: 420px;
             transform: translateY(20px);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 1.5s ease, border-color 1.5s ease;
             position: relative;
         }
 
@@ -155,20 +156,22 @@
         }
 
         .color-bar input::placeholder {
-            color: rgba(0,0,0,0.4);
+            color: var(--text-secondary);
+            opacity: 0.6;
             font-size: 1rem;
+            transition: color 1.5s ease;
         }
 
         .color-go-btn {
             background: var(--text-color);
-            color: #fff;
+            color: var(--card-bg); /* Use card-bg color to always contrast text properly */
             border: none;
             border-radius: 30px;
             padding: 8px 20px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, background 1.5s ease;
+            transition: transform 0.2s, background 1.5s ease, color 1.5s ease;
         }
 
         .color-go-btn:hover {
@@ -192,17 +195,17 @@
             bottom: -45px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--card-bg);
             color: var(--text-color);
             padding: 8px 18px;
             border-radius: 15px;
             font-size: 0.95rem;
             font-weight: 500;
             box-shadow: 0 5px 15px var(--shadow-color);
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            border: 1px solid var(--border-color);
             opacity: 0;
             pointer-events: none; /* Changed dynamically in JS */
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s ease, background 1.5s ease, border-color 1.5s ease;
             white-space: nowrap;
         }
 
@@ -217,7 +220,7 @@
         }
 
         .suggestion-link:hover {
-            color: var(--text-color);
+            opacity: 0.7;
         }
 
         @keyframes popIn {
@@ -233,7 +236,6 @@
             margin-bottom: 40px;
             text-align: center;
             color: var(--text-color);
-            text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.6);
             position: relative;
             z-index: 10;
             transition: color 1.5s ease;
@@ -255,11 +257,11 @@
             -webkit-backdrop-filter: blur(8px);
             border-radius: 16px;
             overflow: hidden;
-            transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+            transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 1.5s ease, background-color 1.5s ease;
             text-decoration: none;
             color: var(--text-secondary);
             box-shadow: 0 8px 20px var(--shadow-color);
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            border: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -464,7 +466,7 @@
                 colorOverlay.style.opacity = '1';
                 colorBar.style.transform = 'translateY(0)';
                 colorInput.value = '';
-                errorMsg.style.opacity = '0'; // Hide error if opening fresh
+                errorMsg.style.opacity = '0'; 
                 errorMsg.style.pointerEvents = 'none';
                 colorInput.focus();
             }, 10);
@@ -478,31 +480,31 @@
             }, 400);
         }
 
-        // Hide error immediately if they start typing again to self-correct
+        // Hide error immediately if they start typing again
         colorInput.addEventListener('input', () => {
             errorMsg.style.opacity = '0';
             errorMsg.style.pointerEvents = 'none';
         });
 
-        // New Polite Error function that supports clickable suggestions
-        function showPoliteError(suggestion = null) {
-            colorInput.select(); // Highlight text to type over it
+        // Smart Polite Error Function (Now accepts custom messages like "Please enter...")
+        function showPoliteError(suggestion = null, customMsg = null) {
+            colorInput.select(); 
             
             if (suggestion) {
+                // Spellchecker Suggestion Flow
                 errorMsg.innerHTML = `Did you mean '<span class="suggestion-link" onclick="applySuggestion('${suggestion}')">${suggestion}</span>'?`;
-                errorMsg.style.pointerEvents = 'auto'; // Make it clickable!
+                errorMsg.style.pointerEvents = 'auto'; 
                 
-                // 5 second timer for suggestions
                 if(errorTimeout) clearTimeout(errorTimeout);
                 errorTimeout = setTimeout(() => {
                     errorMsg.style.opacity = '0';
                     errorMsg.style.pointerEvents = 'none';
                 }, 5000);
             } else {
-                errorMsg.innerHTML = "I don't know that colour! Try another?";
+                // Standard Error / Custom Message Flow
+                errorMsg.innerHTML = customMsg ? customMsg : "I don't know that colour! Try another?";
                 errorMsg.style.pointerEvents = 'none';
                 
-                // 2 second timer for standard errors
                 if(errorTimeout) clearTimeout(errorTimeout);
                 errorTimeout = setTimeout(() => {
                     errorMsg.style.opacity = '0';
@@ -553,11 +555,9 @@
             let bestMatch = null;
             let minDistance = 3; // Threshold: max 2 edits allowed
             
-            // Standard fallback colors in case dictionary doesn't load fully
-            const standardColors =['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown', 'black', 'white', 'gray', 'grey', 'cyan', 'magenta', 'crimson', 'fuchsia'];
+            const standardColors =['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown', 'black', 'white', 'gray', 'grey', 'cyan', 'magenta', 'crimson', 'fuchsia', 'silver'];
             
             let colorKeys = standardColors;
-            // Add custom dictionary colors if the file loaded successfully
             if (window.extendedColors) {
                 colorKeys = [...new Set([...standardColors, ...Object.keys(window.extendedColors)])];
             }
@@ -572,27 +572,23 @@
             return bestMatch;
         }
 
-        // The Ultimate Resolver: Evaluates Hex -> Custom Dictionary -> Standard CSS
+        // Evaluates Hex -> Custom Dictionary -> Standard CSS
         function resolveColorToRGB(inputStr) {
             let query = inputStr.trim().toLowerCase().replace(/\s+/g, ''); 
             if (!query) return null;
 
-            // 1. Is it a Hex code? 
             if (/^#?[0-9a-f]{3,8}$/.test(query)) {
                 if (!query.startsWith('#')) query = '#' + query;
                 return getRGBFromColorString(query); 
             }
 
-            // 2. Is it in our massive external dictionary? (colors.js)
             if (window.extendedColors && window.extendedColors[query]) {
                 return getRGBFromColorString(window.extendedColors[query]);
             }
 
-            // 3. Is it a native CSS Color?
             return getRGBFromColorString(inputStr); 
         }
 
-        // Hack to reliably convert colors to RGB and reject invalid ones
         function getRGBFromColorString(colorStr) {
             const temp = document.createElement('div');
             temp.style.display = 'none';
@@ -613,7 +609,6 @@
             return [parseInt(match[1]), parseInt(match[2]), parseInt(match[3])];
         }
 
-        // Convert RGB to HSL for perfect shading
         function rgbToHsl(r, g, b) {
             r /= 255; g /= 255; b /= 255;
             let max = Math.max(r, g, b), min = Math.min(r, g, b);
@@ -630,39 +625,54 @@
                 }
                 h /= 6;
             }
-            return[h * 360, s * 100, l * 100];
+            return [h * 360, s * 100, l * 100];
         }
 
         function applyColorTheme() {
             let inputColor = colorInput.value;
+            
+            // 1. EMPTY INPUT CHECK
+            if (inputColor.trim() === '') {
+                return showPoliteError(null, "Please enter the colour");
+            }
+
             const rgb = resolveColorToRGB(inputColor);
             
             if(!rgb) {
-                // If invalid, try to find a suggestion
                 const suggestion = findNearestColor(inputColor);
                 return showPoliteError(suggestion);
             }
 
-            // If valid color is found, hide errors and apply theme
             errorMsg.style.opacity = '0';
             errorMsg.style.pointerEvents = 'none';
 
-            let[h, s, l] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
-
+            let [h, s, l] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
             const root = document.documentElement;
+
+            // 2. DARK MODE CALCULATION (If color is dark, flip the UI!)
+            const isDark = l < 50; 
             
-            root.style.setProperty('--text-color', `hsl(${h}, ${s}%, 20%)`);
-            root.style.setProperty('--text-secondary', `hsl(${h}, ${s}%, 35%)`);
-            root.style.setProperty('--accent-color', `hsl(${h}, ${s}%, 65%)`);
-            root.style.setProperty('--shadow-color', `hsla(${h}, ${s}%, 60%, 0.3)`);
+            // Text adjusts to be readable against dark or light background
+            root.style.setProperty('--text-color', `hsl(${h}, ${s}%, ${isDark ? 95 : 20}%)`);
+            root.style.setProperty('--text-secondary', `hsl(${h}, ${s}%, ${isDark ? 75 : 35}%)`);
+            root.style.setProperty('--accent-color', `hsl(${h}, ${s}%, ${isDark ? 70 : 65}%)`);
             
-            root.style.setProperty('--bg-grad-1', `hsl(${h}, ${s}%, 94%)`);
-            root.style.setProperty('--bg-grad-2', `hsl(${h}, ${s}%, 88%)`);
-            root.style.setProperty('--bg-grad-3', `hsl(${h}, ${s}%, 96%)`);
-            root.style.setProperty('--bg-grad-4', `hsl(${h}, ${s}%, 91%)`);
+            // Shadow gets darker in dark mode
+            root.style.setProperty('--shadow-color', `hsla(${h}, ${s}%, ${isDark ? 5 : 60}%, ${isDark ? 0.6 : 0.3})`);
             
-            root.style.setProperty('--petal-color', `hsl(${h}, ${s}%, 82%)`);
-            root.style.setProperty('--petal-shadow', `hsla(${h}, ${s}%, 82%, 0.5)`);
+            // Background gradients invert their lightness
+            root.style.setProperty('--bg-grad-1', `hsl(${h}, ${s}%, ${isDark ? 15 : 94}%)`);
+            root.style.setProperty('--bg-grad-2', `hsl(${h}, ${s}%, ${isDark ? 10 : 88}%)`);
+            root.style.setProperty('--bg-grad-3', `hsl(${h}, ${s}%, ${isDark ? 18 : 96}%)`);
+            root.style.setProperty('--bg-grad-4', `hsl(${h}, ${s}%, ${isDark ? 12 : 91}%)`);
+            
+            // Cards switch from frosted white to frosted dark-tint
+            root.style.setProperty('--card-bg', `hsla(${h}, ${s}%, ${isDark ? 20 : 100}%, 0.65)`);
+            root.style.setProperty('--border-color', `hsla(${h}, ${s}%, ${isDark ? 30 : 100}%, 0.5)`);
+
+            // Petals dynamically switch shade
+            root.style.setProperty('--petal-color', `hsl(${h}, ${s}%, ${isDark ? 30 : 82}%)`);
+            root.style.setProperty('--petal-shadow', `hsla(${h}, ${s}%, ${isDark ? 30 : 82}%, 0.5)`);
 
             closeColorBar();
             
