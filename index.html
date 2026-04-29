@@ -27,7 +27,7 @@
             --petal-shadow: rgba(255, 183, 197, 0.5);
         }
 
-        /* --- Living Sunset Background (Restored exactly to original smoothness) --- */
+        /* --- Living Sunset Background --- */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
@@ -42,7 +42,7 @@
             background-size: 400% 400%;
             animation: breathe 15s ease infinite;
             overflow-x: hidden;
-            transition: color 1.5s ease; /* Smooth text color changes only */
+            transition: color 1.5s ease;
         }
 
         @keyframes breathe {
@@ -137,7 +137,7 @@
             align-items: center;
             padding: 10px 20px;
             width: 90%;
-            max-width: 400px;
+            max-width: 420px;
             transform: translateY(20px);
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
@@ -184,6 +184,26 @@
             cursor: pointer;
             font-weight: bold;
             transition: color 1.5s ease;
+        }
+
+        /* Polite Error Popup */
+        .color-error-msg {
+            position: absolute;
+            bottom: -45px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text-color);
+            padding: 8px 18px;
+            border-radius: 15px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            box-shadow: 0 5px 15px var(--shadow-color);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
         }
 
         @keyframes popIn {
@@ -302,6 +322,7 @@
             <span class="color-close-btn" onclick="closeColorBar()">&times;</span>
             <input type="text" id="color-input" placeholder="Type a colour name or Hex color code" autocomplete="off">
             <button class="color-go-btn" onclick="applyColorTheme()">Go</button>
+            <div id="color-error-msg" class="color-error-msg">I don't know that colour! Try another?</div>
         </div>
     </div>
 
@@ -328,6 +349,9 @@
     <div class="footer">
         Just a little corner of the web for you.
     </div>
+
+    <!-- Load our massive dictionary file! -->
+    <script src="colors.js"></script>
 
     <script>
         // --- 1. The Rotating Uplifts ---
@@ -373,25 +397,20 @@
         const colorTriggers =['colour', 'color'];
 
         window.addEventListener('keydown', (e) => {
-            // Stop listening to background typing if the color bar is already open
             if (document.getElementById('color-overlay').style.display === 'flex') return;
 
-            // Only track letters/numbers to avoid tracking shifts/controls
             if (e.key.length === 1) {
                 keysPressed += e.key.toLowerCase();
             }
             
-            // Keep the tracker string capped at 15 (length of silverisridurga)
             if (keysPressed.length > 15) {
                 keysPressed = keysPressed.slice(-15);
             }
 
-            // Check for blossoms trigger
             if (keysPressed === secretCode) {
                 triggerBlossoms();
                 keysPressed = ''; 
             } 
-            // Check for colour bar triggers
             else if (keysPressed.endsWith(colorTriggers[0]) || keysPressed.endsWith(colorTriggers[1])) {
                 openColorBar();
                 keysPressed = '';
@@ -401,7 +420,6 @@
         // --- 4. Petal System ---
         function triggerBlossoms() {
             const container = document.getElementById('blossom-container');
-            
             for(let i = 0; i < 40; i++) {
                 setTimeout(() => {
                     const petal = document.createElement('div');
@@ -414,11 +432,7 @@
                     petal.style.animationDuration = `${Math.random() * 3 + 4}s`; 
                     
                     container.appendChild(petal);
-                    
-                    setTimeout(() => {
-                        petal.remove();
-                    }, 8000); 
-
+                    setTimeout(() => { petal.remove(); }, 8000); 
                 }, i * 150);
             }
         }
@@ -427,14 +441,16 @@
         const colorOverlay = document.getElementById('color-overlay');
         const colorBar = document.getElementById('color-bar');
         const colorInput = document.getElementById('color-input');
+        const errorMsg = document.getElementById('color-error-msg');
+        let errorTimeout;
 
         function openColorBar() {
             colorOverlay.style.display = 'flex';
-            // Slight delay to allow display:flex to apply before animating opacity
             setTimeout(() => {
                 colorOverlay.style.opacity = '1';
                 colorBar.style.transform = 'translateY(0)';
                 colorInput.value = '';
+                errorMsg.style.opacity = '0'; // Hide error if opening fresh
                 colorInput.focus();
             }, 10);
         }
@@ -447,38 +463,69 @@
             }, 400);
         }
 
-        // Allow pressing Enter to submit color
+        function showPoliteError() {
+            errorMsg.style.opacity = '1';
+            colorInput.select(); // Highlight text to type over it immediately
+            
+            if(errorTimeout) clearTimeout(errorTimeout);
+            errorTimeout = setTimeout(() => {
+                errorMsg.style.opacity = '0';
+            }, 2000);
+        }
+
         colorInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                applyColorTheme();
-            }
+            if (e.key === 'Enter') applyColorTheme();
         });
 
-        // Convert the string (like "red" or "cornflowerblue") to RGB using the browser's engine
+        // The Ultimate Resolver: Evaluates Hex -> Custom Dictionary -> Standard CSS
+        function resolveColorToRGB(inputStr) {
+            let query = inputStr.trim().toLowerCase().replace(/\s+/g, ''); 
+            if (!query) return null;
+
+            // 1. Is it a Hex code? 
+            if (/^#?[0-9a-f]{3,8}$/.test(query)) {
+                if (!query.startsWith('#')) query = '#' + query;
+                return getRGBFromColorString(query); 
+            }
+
+            // 2. Is it in our massive external dictionary? (colors.js)
+            if (window.extendedColors && window.extendedColors[query]) {
+                return getRGBFromColorString(window.extendedColors[query]);
+            }
+
+            // 3. Is it a native CSS Color?
+            return getRGBFromColorString(inputStr); 
+        }
+
+        // Hack to reliably convert colors to RGB and reject invalid ones
         function getRGBFromColorString(colorStr) {
             const temp = document.createElement('div');
-            temp.style.color = '#000000'; // Set to black first
-            temp.style.color = colorStr;  // Apply user color
             temp.style.display = 'none';
             document.body.appendChild(temp);
+            
+            temp.style.color = 'rgb(1, 2, 3)'; 
+            temp.style.color = colorStr;  
             
             const computedColor = window.getComputedStyle(temp).color;
             document.body.removeChild(temp);
             
+            if (computedColor === 'rgb(1, 2, 3)' && colorStr.replace(/\s/g, '') !== 'rgb(1,2,3)') {
+                return null;
+            }
+            
             const match = computedColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
             if(!match) return null; 
-            return[parseInt(match[1]), parseInt(match[2]), parseInt(match[3])];
+            return [parseInt(match[1]), parseInt(match[2]), parseInt(match[3])];
         }
 
-        // Math to convert RGB to HSL for perfect shading
+        // Convert RGB to HSL for perfect shading
         function rgbToHsl(r, g, b) {
             r /= 255; g /= 255; b /= 255;
             let max = Math.max(r, g, b), min = Math.min(r, g, b);
             let h, s, l = (max + min) / 2;
 
-            if(max === min) {
-                h = s = 0; 
-            } else {
+            if(max === min) { h = s = 0; } 
+            else {
                 let d = max - min;
                 s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
                 switch(max) {
@@ -492,43 +539,31 @@
         }
 
         function applyColorTheme() {
-            let inputColor = colorInput.value.trim();
-            if(!inputColor) return closeColorBar();
+            let inputColor = colorInput.value;
+            const rgb = resolveColorToRGB(inputColor);
+            
+            if(!rgb) return showPoliteError();
 
-            const rgb = getRGBFromColorString(inputColor);
-            if(!rgb) return closeColorBar(); // If completely invalid, just close
-
-            // Get the HSL values of whatever they typed
             let[h, s, l] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
 
-            // Adjust the CSS variables to create the perfectly balanced theme
             const root = document.documentElement;
             
-            // Text needs to be dark for readability (Lightness: 20-35%)
             root.style.setProperty('--text-color', `hsl(${h}, ${s}%, 20%)`);
             root.style.setProperty('--text-secondary', `hsl(${h}, ${s}%, 35%)`);
-            
-            // Accents and Shadows
             root.style.setProperty('--accent-color', `hsl(${h}, ${s}%, 65%)`);
             root.style.setProperty('--shadow-color', `hsla(${h}, ${s}%, 60%, 0.3)`);
             
-            // Background Gradient uses 4 super light/pastel shades (Lightness: 88-96%)
             root.style.setProperty('--bg-grad-1', `hsl(${h}, ${s}%, 94%)`);
             root.style.setProperty('--bg-grad-2', `hsl(${h}, ${s}%, 88%)`);
             root.style.setProperty('--bg-grad-3', `hsl(${h}, ${s}%, 96%)`);
             root.style.setProperty('--bg-grad-4', `hsl(${h}, ${s}%, 91%)`);
             
-            // Petals use a highly visible pastel tone (Lightness: 82%)
             root.style.setProperty('--petal-color', `hsl(${h}, ${s}%, 82%)`);
             root.style.setProperty('--petal-shadow', `hsla(${h}, ${s}%, 82%, 0.5)`);
 
-            // Close the bar and celebrate with new petals!
             closeColorBar();
             
-            // Small delay so the petals drop as the background starts fading to the new color
-            setTimeout(() => {
-                triggerBlossoms();
-            }, 150);
+            setTimeout(() => { triggerBlossoms(); }, 150);
         }
     </script>
 </body>
