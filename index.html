@@ -26,9 +26,12 @@
             /* Dynamic Petal Variables */
             --petal-color: #ffb7c5;
             --petal-shadow: rgba(255, 183, 197, 0.5);
+            
+            /* Microbe specific */
+            --microbe-color: #facc15;
         }
 
-        /* --- Living Sunset Background --- */
+        /* --- Living Sunset Background (Base) --- */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
@@ -43,7 +46,7 @@
             background-size: 400% 400%;
             animation: breathe 15s ease infinite;
             overflow-x: hidden;
-            transition: color 1.5s ease;
+            transition: color 1.5s ease, background 1.5s ease;
         }
 
         @keyframes breathe {
@@ -52,220 +55,175 @@
             100% { background-position: 0% 50%; }
         }
 
+        /* --- Cinematic Background Container --- */
+        #cinematic-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; overflow: hidden; pointer-events: none;
+            opacity: 1; transition: opacity 1.5s ease;
+        }
+
+        /* --- Cinematic Elements CSS --- */
+        /* Interstellar */
+        .dust-streak {
+            position: absolute;
+            background: linear-gradient(to bottom, transparent, rgba(255, 180, 50, 0.5), transparent);
+            width: 1px; height: 100vh;
+            box-shadow: 0 0 8px rgba(255, 157, 0, 0.4);
+            opacity: 0; animation: tesseractPulse linear infinite;
+        }
+        @keyframes tesseractPulse {
+            0% { opacity: 0; transform: translateX(-10px); }
+            50% { opacity: 1; transform: translateX(0); }
+            100% { opacity: 0; transform: translateX(10px); }
+        }
+        .accretion-disk {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) rotateX(75deg);
+            width: 800px; height: 800px; border-radius: 50%;
+            box-shadow: 0 0 120px #ff9d00, inset 0 0 80px #ff5e00;
+            filter: blur(30px); animation: rotateDisk 25s linear infinite; opacity: 0.4;
+        }
+        @keyframes rotateDisk {
+            from { transform: translate(-50%, -50%) rotateX(75deg) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotateX(75deg) rotate(360deg); }
+        }
+
+        /* Project Hail Mary */
+        .star {
+            position: absolute; background: white; border-radius: 50%;
+            opacity: 0.3; animation: zoom linear infinite;
+        }
+        @keyframes zoom { 
+            from { transform: scale(0) translateY(0); opacity: 0; }
+            50% { opacity: 1; }
+            to { transform: scale(1.5) translateY(-100vh); opacity: 0; } 
+        }
+        .ripple {
+            position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
+            width: 120vw; height: 2px; background: var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-color); opacity: 0;
+            animation: pulseWave 5s infinite;
+        }
+        @keyframes pulseWave {
+            0% { transform: translateX(-50%) translateY(0); opacity: 0; }
+            20% { opacity: 0.4; }
+            100% { transform: translateX(-50%) translateY(-100vh); opacity: 0; }
+        }
+
         /* --- Toast / Modal Styles --- */
         #toast-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            padding: 20px;
-            box-sizing: border-box;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            display: none; justify-content: center; align-items: center;
+            z-index: 9999; padding: 20px; box-sizing: border-box;
         }
 
         .toast-card {
-            background: var(--card-bg);
-            width: 100%;
-            max-width: 500px;
-            padding: 60px 40px;
-            border-radius: 24px;
+            background: var(--card-bg); width: 100%; max-width: 500px;
+            padding: 60px 40px; border-radius: 24px;
             box-shadow: 0 20px 60px var(--shadow-color);
-            position: relative;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            box-sizing: border-box;
-            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative; text-align: center; border: 1px solid var(--border-color);
+            box-sizing: border-box; animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             transition: box-shadow 1.5s ease, background 1.5s ease, border-color 1.5s ease;
         }
 
         .toast-card h2 {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: 1.8rem;
-            font-weight: 600;
-            margin: 0;
-            color: var(--text-color);
-            letter-spacing: -0.5px;
-            line-height: 1.4;
+            font-size: 1.8rem; font-weight: 600; margin: 0;
+            color: var(--text-color); letter-spacing: -0.5px; line-height: 1.4;
             transition: color 1.5s ease;
         }
 
         .close-btn {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 32px;
-            font-weight: 300;
-            cursor: pointer;
-            color: var(--text-secondary);
-            line-height: 1;
-            transition: color 0.2s, transform 0.2s;
-            user-select: none;
+            position: absolute; top: 15px; right: 20px;
+            font-size: 32px; font-weight: 300; cursor: pointer;
+            color: var(--text-secondary); line-height: 1;
+            transition: color 0.2s, transform 0.2s; user-select: none;
         }
 
-        .close-btn:hover {
-            color: var(--accent-color);
-            transform: scale(1.1);
-        }
+        .close-btn:hover { color: var(--accent-color); transform: scale(1.1); }
 
         /* --- Color Input Bar Styles --- */
         #color-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9998;
-            opacity: 0;
-            transition: opacity 0.4s ease;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            display: none; justify-content: center; align-items: center;
+            z-index: 9998; opacity: 0; transition: opacity 0.4s ease;
         }
 
         .color-bar {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-            border-radius: 50px;
-            display: flex;
-            align-items: center;
-            padding: 10px 20px;
-            width: 90%;
-            max-width: 420px;
-            transform: translateY(20px);
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15); border-radius: 50px;
+            display: flex; align-items: center; padding: 10px 20px;
+            width: 90%; max-width: 420px; transform: translateY(20px);
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 1.5s ease, border-color 1.5s ease;
             position: relative;
         }
 
         .color-bar input {
-            flex-grow: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            font-size: 1.1rem;
-            color: var(--text-color);
-            font-family: 'Segoe UI', sans-serif;
-            padding: 10px;
+            flex-grow: 1; background: transparent; border: none; outline: none;
+            font-size: 1.1rem; color: var(--text-color); font-family: 'Segoe UI', sans-serif; padding: 10px;
         }
 
         .color-bar input::placeholder {
-            color: var(--text-secondary);
-            opacity: 0.6;
-            font-size: 1rem;
-            transition: color 1.5s ease;
+            color: var(--text-secondary); opacity: 0.6; font-size: 1rem; transition: color 1.5s ease;
         }
 
         .color-go-btn {
-            background: var(--text-color);
-            color: var(--card-bg); /* Use card-bg color to always contrast text properly */
-            border: none;
-            border-radius: 30px;
-            padding: 8px 20px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
+            background: var(--text-color); color: var(--card-bg); 
+            border: none; border-radius: 30px; padding: 8px 20px;
+            font-size: 1rem; font-weight: 600; cursor: pointer;
             transition: transform 0.2s, background 1.5s ease, color 1.5s ease;
         }
 
-        .color-go-btn:hover {
-            transform: scale(1.05);
-        }
+        .color-go-btn:hover { transform: scale(1.05); }
 
         .color-close-btn {
-            position: absolute;
-            top: -40px;
-            right: 10px;
-            font-size: 24px;
-            color: var(--text-color);
-            cursor: pointer;
-            font-weight: bold;
-            transition: color 1.5s ease;
+            position: absolute; top: -40px; right: 10px;
+            font-size: 24px; color: var(--text-color); cursor: pointer;
+            font-weight: bold; transition: color 1.5s ease;
         }
 
-        /* Polite Error Popup & Suggestions */
         .color-error-msg {
-            position: absolute;
-            bottom: -45px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--card-bg);
-            color: var(--text-color);
-            padding: 8px 18px;
-            border-radius: 15px;
-            font-size: 0.95rem;
-            font-weight: 500;
-            box-shadow: 0 5px 15px var(--shadow-color);
-            border: 1px solid var(--border-color);
-            opacity: 0;
-            pointer-events: none; /* Changed dynamically in JS */
-            transition: opacity 0.3s ease, background 1.5s ease, border-color 1.5s ease;
+            position: absolute; bottom: -45px; left: 50%; transform: translateX(-50%);
+            background: var(--card-bg); color: var(--text-color);
+            padding: 8px 18px; border-radius: 15px; font-size: 0.95rem; font-weight: 500;
+            box-shadow: 0 5px 15px var(--shadow-color); border: 1px solid var(--border-color);
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease, background 1.5s ease, border-color 1.5s ease;
             white-space: nowrap;
         }
 
         .suggestion-link {
-            font-weight: 700;
-            color: var(--accent-color);
-            cursor: pointer;
-            text-decoration: underline;
-            text-decoration-thickness: 2px;
-            text-underline-offset: 3px;
-            transition: color 0.2s ease;
+            font-weight: 700; color: var(--accent-color); cursor: pointer;
+            text-decoration: underline; text-decoration-thickness: 2px;
+            text-underline-offset: 3px; transition: color 0.2s ease;
         }
 
-        .suggestion-link:hover {
-            opacity: 0.7;
-        }
+        .suggestion-link:hover { opacity: 0.7; }
 
-        @keyframes popIn {
-            0% { transform: scale(0.85); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+        @keyframes popIn { 0% { transform: scale(0.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
         /* --- Main Content --- */
         h1 {
-            font-family: 'IM Fell English', serif;
-            font-weight: 400;
-            font-size: 3.5rem;
-            margin-bottom: 40px;
-            text-align: center;
-            color: var(--text-color);
-            position: relative;
-            z-index: 10;
-            transition: color 1.5s ease;
+            font-family: 'IM Fell English', serif; font-weight: 400; font-size: 3.5rem;
+            margin-bottom: 40px; text-align: center; color: var(--text-color);
+            position: relative; z-index: 10; transition: color 1.5s ease, text-shadow 1.5s ease;
         }
 
         .project-grid {
-            display: grid;
-            width: 100%;
-            max-width: 800px;
+            display: grid; width: 100%; max-width: 800px;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            position: relative;
-            z-index: 10;
+            gap: 25px; position: relative; z-index: 10;
         }
 
         .card {
-            background-color: var(--card-bg);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-radius: 16px;
-            overflow: hidden;
+            background-color: var(--card-bg); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border-radius: 16px; overflow: hidden;
             transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 1.5s ease, background-color 1.5s ease;
-            text-decoration: none;
-            color: var(--text-secondary);
-            box-shadow: 0 8px 20px var(--shadow-color);
-            border: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 25px 20px;
+            text-decoration: none; color: var(--text-secondary);
+            box-shadow: 0 8px 20px var(--shadow-color); border: 1px solid var(--border-color);
+            display: flex; flex-direction: column; align-items: center; padding: 25px 20px;
         }
 
         .card:hover {
@@ -275,54 +233,61 @@
         }
 
         .card-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-color);
-            transition: color 1.5s ease;
+            font-size: 1.5rem; font-weight: 600; color: var(--text-color); transition: color 1.5s ease;
         }
 
         .footer {
-            margin-top: auto;
-            padding: 30px 20px 25px;
-            text-align: center;
-            font-size: 1rem;
-            color: var(--text-secondary);
-            font-style: italic;
-            position: relative;
-            z-index: 10;
-            transition: color 1.5s ease;
+            margin-top: auto; padding: 30px 20px 25px; text-align: center;
+            font-size: 1rem; color: var(--text-secondary); font-style: italic;
+            position: relative; z-index: 10; transition: color 1.5s ease;
         }
 
-        /* --- Cherry Blossom Secret Styles --- */
+        /* --- Secret Animation Styles (Petals, Voxels, Astrophage) --- */
         #blossom-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 999;
-            overflow: hidden;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 999; overflow: hidden;
         }
 
         .petal {
-            position: absolute;
-            top: -10%;
-            background-color: var(--petal-color);
-            border-radius: 15px 0 15px 0;
-            opacity: 0.8;
+            position: absolute; top: -10%; background-color: var(--petal-color);
+            border-radius: 15px 0 15px 0; opacity: 0.8;
             box-shadow: 0 0 5px var(--petal-shadow);
-            animation: fall linear forwards;
+            animation: fallPetal linear forwards;
             transition: background-color 1.5s ease, box-shadow 1.5s ease;
         }
-
-        @keyframes fall {
+        @keyframes fallPetal {
             0% { transform: translateY(0) rotate(0deg) translateX(0); }
             100% { transform: translateY(110vh) rotate(720deg) translateX(50px); }
+        }
+
+        .voxel {
+            position: absolute; background: var(--accent-color);
+            width: 4px; height: 15px; box-shadow: 0 0 10px var(--accent-color);
+            animation: fallVoxel linear forwards;
+        }
+        @keyframes fallVoxel { to { transform: translateY(110vh); } }
+
+        .microbe-wrapper {
+            position: absolute; top: -20px; animation: microbeFall linear forwards;
+        }
+        .microbe {
+            width: 8px; height: 8px; background: var(--microbe-color); border-radius: 50%;
+            box-shadow: 0 0 12px var(--microbe-color); animation: jitter 0.15s infinite alternate;
+        }
+        @keyframes microbeFall {
+            from { transform: translateY(0); }
+            to { transform: translateY(115vh); }
+        }
+        @keyframes jitter {
+            from { transform: translate(-4px, -4px) scale(0.9); }
+            to { transform: translate(4px, 4px) scale(1.1); }
         }
     </style>
 </head>
 <body>
+
+    <!-- Cinematic Background Container -->
+    <div id="cinematic-bg"></div>
 
     <!-- Greeting Toast Component -->
     <div id="toast-overlay">
@@ -336,13 +301,13 @@
     <div id="color-overlay">
         <div class="color-bar" id="color-bar">
             <span class="color-close-btn" onclick="closeColorBar()">&times;</span>
-            <input type="text" id="color-input" placeholder="Type a colour name or Hex color code" autocomplete="off">
+            <input type="text" id="color-input" placeholder="Type a colour name or Hex code" autocomplete="off">
             <button class="color-go-btn" onclick="applyColorTheme()">Go</button>
             <div id="color-error-msg" class="color-error-msg">I don't know that colour! Try another?</div>
         </div>
     </div>
 
-    <!-- Container for secret cherry blossoms -->
+    <!-- Container for secret animations -->
     <div id="blossom-container"></div>
 
     <h1>Sri's Stuff</h1>
@@ -370,6 +335,9 @@
     <script src="colors.js"></script>
 
     <script>
+        // --- State Management ---
+        let currentThemeMode = 'default'; // 'default', 'interstellar', 'phm'
+
         // --- 1. The Rotating Uplifts ---
         const uplifts =[
             "Hope you're having a beautiful day, Sri.",
@@ -433,27 +401,64 @@
             }
         });
 
-        // --- 4. Petal System ---
+        // --- 4. Secret Animations (Petals / Voxels / Astrophage) ---
         function triggerBlossoms() {
             const container = document.getElementById('blossom-container');
-            for(let i = 0; i < 40; i++) {
-                setTimeout(() => {
-                    const petal = document.createElement('div');
-                    petal.classList.add('petal');
-                    
-                    const size = Math.random() * 12 + 10; 
-                    petal.style.width = `${size}px`;
-                    petal.style.height = `${size}px`;
-                    petal.style.left = `${Math.random() * 100}vw`;
-                    petal.style.animationDuration = `${Math.random() * 3 + 4}s`; 
-                    
-                    container.appendChild(petal);
-                    setTimeout(() => { petal.remove(); }, 8000); 
-                }, i * 150);
+            
+            if (currentThemeMode === 'interstellar') {
+                // Falling Voxels
+                for(let i=0; i<50; i++) {
+                    setTimeout(() => {
+                        const v = document.createElement('div');
+                        v.className = 'voxel';
+                        v.style.left = Math.random() * 100 + 'vw';
+                        v.style.top = '-20px';
+                        v.style.animationDuration = (Math.random() * 2 + 1) + 's';
+                        container.appendChild(v);
+                        setTimeout(() => v.remove(), 2500);
+                    }, i * 50);
+                }
+            } 
+            else if (currentThemeMode === 'phm') {
+                // Falling Astro-phage
+                for(let i=0; i<60; i++) {
+                    setTimeout(() => {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'microbe-wrapper';
+                        wrapper.style.left = Math.random() * 100 + 'vw';
+                        wrapper.style.animationDuration = (Math.random() * 2 + 2) + 's'; 
+                        
+                        const m = document.createElement('div');
+                        m.className = 'microbe';
+                        
+                        wrapper.appendChild(m);
+                        container.appendChild(wrapper);
+                        
+                        setTimeout(() => wrapper.remove(), 5000); 
+                    }, i * 70); 
+                }
+            } 
+            else {
+                // Default: Falling Pink Petals (Dynamic based on standard theme)
+                for(let i = 0; i < 40; i++) {
+                    setTimeout(() => {
+                        const petal = document.createElement('div');
+                        petal.classList.add('petal');
+                        
+                        const size = Math.random() * 12 + 10; 
+                        petal.style.width = `${size}px`;
+                        petal.style.height = `${size}px`;
+                        petal.style.left = `${Math.random() * 100}vw`;
+                        petal.style.animationDuration = `${Math.random() * 3 + 4}s`; 
+                        
+                        container.appendChild(petal);
+                        setTimeout(() => { petal.remove(); }, 8000); 
+                    }, i * 150);
+                }
             }
         }
 
-        // --- 5. Dynamic Colour Theming System ---
+        // --- 5. UI Elements & Spell Checker System ---
         const colorOverlay = document.getElementById('color-overlay');
         const colorBar = document.getElementById('color-bar');
         const colorInput = document.getElementById('color-input');
@@ -480,41 +485,32 @@
             }, 400);
         }
 
-        // Hide error immediately if they start typing again
         colorInput.addEventListener('input', () => {
             errorMsg.style.opacity = '0';
             errorMsg.style.pointerEvents = 'none';
         });
 
-        // Smart Polite Error Function (Now accepts custom messages like "Please enter...")
         function showPoliteError(suggestion = null, customMsg = null) {
             colorInput.select(); 
-            
             if (suggestion) {
-                // Spellchecker Suggestion Flow
                 errorMsg.innerHTML = `Did you mean '<span class="suggestion-link" onclick="applySuggestion('${suggestion}')">${suggestion}</span>'?`;
                 errorMsg.style.pointerEvents = 'auto'; 
-                
                 if(errorTimeout) clearTimeout(errorTimeout);
                 errorTimeout = setTimeout(() => {
                     errorMsg.style.opacity = '0';
                     errorMsg.style.pointerEvents = 'none';
                 }, 5000);
             } else {
-                // Standard Error / Custom Message Flow
                 errorMsg.innerHTML = customMsg ? customMsg : "I don't know that colour! Try another?";
                 errorMsg.style.pointerEvents = 'none';
-                
                 if(errorTimeout) clearTimeout(errorTimeout);
                 errorTimeout = setTimeout(() => {
                     errorMsg.style.opacity = '0';
                 }, 2000);
             }
-
             errorMsg.style.opacity = '1';
         }
 
-        // Called when the user clicks the suggestion span
         function applySuggestion(suggestion) {
             colorInput.value = suggestion;
             applyColorTheme();
@@ -524,24 +520,19 @@
             if (e.key === 'Enter') applyColorTheme();
         });
 
-        // --- Levenshtein Distance Algorithm (Spell Checker) ---
         function getLevenshteinDistance(a, b) {
             const matrix =[];
-            for (let i = 0; i <= b.length; i++) {
-                matrix[i] = [i];
-            }
-            for (let j = 0; j <= a.length; j++) {
-                matrix[0][j] = j;
-            }
+            for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
+            for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
             for (let i = 1; i <= b.length; i++) {
                 for (let j = 1; j <= a.length; j++) {
                     if (b.charAt(i - 1) === a.charAt(j - 1)) {
                         matrix[i][j] = matrix[i - 1][j - 1];
                     } else {
                         matrix[i][j] = Math.min(
-                            matrix[i - 1][j - 1] + 1, // substitution
-                            matrix[i][j - 1] + 1,     // insertion
-                            matrix[i - 1][j] + 1      // deletion
+                            matrix[i - 1][j - 1] + 1, 
+                            matrix[i][j - 1] + 1,     
+                            matrix[i - 1][j] + 1      
                         );
                     }
                 }
@@ -549,12 +540,10 @@
             return matrix[b.length][a.length];
         }
 
-        // Scans dictionary to find the closest match within 2 edits
         function findNearestColor(inputStr) {
             let query = inputStr.trim().toLowerCase().replace(/\s+/g, '');
             let bestMatch = null;
-            let minDistance = 3; // Threshold: max 2 edits allowed
-            
+            let minDistance = 3; 
             const standardColors =['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown', 'black', 'white', 'gray', 'grey', 'cyan', 'magenta', 'crimson', 'fuchsia', 'silver'];
             
             let colorKeys = standardColors;
@@ -572,20 +561,16 @@
             return bestMatch;
         }
 
-        // Evaluates Hex -> Custom Dictionary -> Standard CSS
         function resolveColorToRGB(inputStr) {
             let query = inputStr.trim().toLowerCase().replace(/\s+/g, ''); 
             if (!query) return null;
-
             if (/^#?[0-9a-f]{3,8}$/.test(query)) {
                 if (!query.startsWith('#')) query = '#' + query;
                 return getRGBFromColorString(query); 
             }
-
             if (window.extendedColors && window.extendedColors[query]) {
                 return getRGBFromColorString(window.extendedColors[query]);
             }
-
             return getRGBFromColorString(inputStr); 
         }
 
@@ -593,27 +578,20 @@
             const temp = document.createElement('div');
             temp.style.display = 'none';
             document.body.appendChild(temp);
-            
             temp.style.color = 'rgb(1, 2, 3)'; 
             temp.style.color = colorStr;  
-            
             const computedColor = window.getComputedStyle(temp).color;
             document.body.removeChild(temp);
-            
-            if (computedColor === 'rgb(1, 2, 3)' && colorStr.replace(/\s/g, '') !== 'rgb(1,2,3)') {
-                return null;
-            }
-            
+            if (computedColor === 'rgb(1, 2, 3)' && colorStr.replace(/\s/g, '') !== 'rgb(1,2,3)') return null;
             const match = computedColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
             if(!match) return null; 
-            return [parseInt(match[1]), parseInt(match[2]), parseInt(match[3])];
+            return[parseInt(match[1]), parseInt(match[2]), parseInt(match[3])];
         }
 
         function rgbToHsl(r, g, b) {
             r /= 255; g /= 255; b /= 255;
             let max = Math.max(r, g, b), min = Math.min(r, g, b);
             let h, s, l = (max + min) / 2;
-
             if(max === min) { h = s = 0; } 
             else {
                 let d = max - min;
@@ -625,17 +603,114 @@
                 }
                 h /= 6;
             }
-            return [h * 360, s * 100, l * 100];
+            return[h * 360, s * 100, l * 100];
+        }
+
+        // --- 6. Theming Application Engine ---
+        function applyCinematicTheme(mode) {
+            const root = document.documentElement;
+            const bgContainer = document.getElementById('cinematic-bg');
+            bgContainer.innerHTML = ''; // Clear previous
+
+            if (mode === 'interstellar') {
+                currentThemeMode = 'interstellar';
+                document.body.style.background = '#000';
+                
+                root.style.setProperty('--text-color', '#ffffff');
+                root.style.setProperty('--text-secondary', '#b0b0b0');
+                root.style.setProperty('--accent-color', '#ff9d00');
+                root.style.setProperty('--card-bg', 'rgba(20, 20, 20, 0.7)');
+                root.style.setProperty('--border-color', 'rgba(255, 157, 0, 0.3)');
+                root.style.setProperty('--shadow-color', 'rgba(255, 157, 0, 0.2)');
+
+                // Accretion Disk
+                const disk = document.createElement('div');
+                disk.className = 'accretion-disk';
+                bgContainer.appendChild(disk);
+
+                // Tesseract Strings
+                for(let i=0; i<15; i++){
+                    const d = document.createElement('div');
+                    d.className = 'dust-streak';
+                    d.style.left = Math.random() * 100 + 'vw';
+                    d.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    d.style.animationDelay = (Math.random() * 5) + 's';
+                    bgContainer.appendChild(d);
+                }
+
+                bgContainer.style.background = 'radial-gradient(circle at center, #111 0%, #000 70%)';
+            } 
+            else if (mode === 'phm') {
+                currentThemeMode = 'phm';
+                document.body.style.background = '#020617';
+                
+                root.style.setProperty('--text-color', '#e2e8f0');
+                root.style.setProperty('--text-secondary', '#94a3b8');
+                root.style.setProperty('--accent-color', '#ff3333');
+                root.style.setProperty('--card-bg', 'rgba(15, 23, 42, 0.85)');
+                root.style.setProperty('--border-color', 'rgba(255, 51, 51, 0.3)');
+                root.style.setProperty('--shadow-color', 'rgba(0, 0, 0, 0.5)');
+
+                // Relativistic Stars
+                for(let i=0; i<40; i++){
+                    const s = document.createElement('div');
+                    s.className = 'star';
+                    s.style.width = Math.random() * 3 + 'px';
+                    s.style.height = s.style.width;
+                    s.style.left = Math.random() * 100 + 'vw';
+                    s.style.top = Math.random() * 100 + 'vh';
+                    s.style.animationDuration = (Math.random() * 2 + 1) + 's';
+                    s.style.animationDelay = Math.random() * 3 + 's';
+                    bgContainer.appendChild(s);
+                }
+
+                // Petrova Ripples
+                const r1 = document.createElement('div');
+                r1.className = 'ripple';
+                const r2 = document.createElement('div');
+                r2.className = 'ripple';
+                r2.style.animationDelay = '2.5s';
+                bgContainer.appendChild(r1);
+                bgContainer.appendChild(r2);
+
+                bgContainer.style.background = 'radial-gradient(circle at bottom, #0f172a, #020617)';
+            }
+        }
+
+        function restoreDefaultBackground() {
+            currentThemeMode = 'default';
+            const bgContainer = document.getElementById('cinematic-bg');
+            bgContainer.innerHTML = '';
+            bgContainer.style.background = 'transparent';
+            
+            // Re-apply standard gradient mechanics
+            document.body.style.background = 'linear-gradient(-45deg, var(--bg-grad-1), var(--bg-grad-2), var(--bg-grad-3), var(--bg-grad-4))';
+            document.body.style.backgroundSize = '400% 400%';
         }
 
         function applyColorTheme() {
-            let inputColor = colorInput.value;
+            let inputColor = colorInput.value.trim();
+            let checkColor = inputColor.toLowerCase();
             
-            // 1. EMPTY INPUT CHECK
-            if (inputColor.trim() === '') {
+            if (checkColor === '') {
                 return showPoliteError(null, "Please enter the colour");
             }
 
+            // Check Cinematic Keywords
+            if (checkColor === 'interstellar') {
+                applyCinematicTheme('interstellar');
+                closeColorBar();
+                setTimeout(() => { triggerBlossoms(); }, 150);
+                return;
+            }
+            if (checkColor === 'project hail mary' || checkColor === 'phm' || checkColor === 'hail mary') {
+                applyCinematicTheme('phm');
+                closeColorBar();
+                setTimeout(() => { triggerBlossoms(); }, 150);
+                return;
+            }
+
+            // Normal Color Processing
             const rgb = resolveColorToRGB(inputColor);
             
             if(!rgb) {
@@ -646,36 +721,32 @@
             errorMsg.style.opacity = '0';
             errorMsg.style.pointerEvents = 'none';
 
-            let [h, s, l] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
-            const root = document.documentElement;
+            // Clean up any cinematic elements and restore base background rules
+            if (currentThemeMode !== 'default') {
+                restoreDefaultBackground();
+            }
 
-            // 2. DARK MODE CALCULATION (If color is dark, flip the UI!)
+            let[h, s, l] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+            const root = document.documentElement;
             const isDark = l < 50; 
             
-            // Text adjusts to be readable against dark or light background
             root.style.setProperty('--text-color', `hsl(${h}, ${s}%, ${isDark ? 95 : 20}%)`);
             root.style.setProperty('--text-secondary', `hsl(${h}, ${s}%, ${isDark ? 75 : 35}%)`);
             root.style.setProperty('--accent-color', `hsl(${h}, ${s}%, ${isDark ? 70 : 65}%)`);
-            
-            // Shadow gets darker in dark mode
             root.style.setProperty('--shadow-color', `hsla(${h}, ${s}%, ${isDark ? 5 : 60}%, ${isDark ? 0.6 : 0.3})`);
             
-            // Background gradients invert their lightness
             root.style.setProperty('--bg-grad-1', `hsl(${h}, ${s}%, ${isDark ? 15 : 94}%)`);
             root.style.setProperty('--bg-grad-2', `hsl(${h}, ${s}%, ${isDark ? 10 : 88}%)`);
             root.style.setProperty('--bg-grad-3', `hsl(${h}, ${s}%, ${isDark ? 18 : 96}%)`);
             root.style.setProperty('--bg-grad-4', `hsl(${h}, ${s}%, ${isDark ? 12 : 91}%)`);
             
-            // Cards switch from frosted white to frosted dark-tint
             root.style.setProperty('--card-bg', `hsla(${h}, ${s}%, ${isDark ? 20 : 100}%, 0.65)`);
             root.style.setProperty('--border-color', `hsla(${h}, ${s}%, ${isDark ? 30 : 100}%, 0.5)`);
 
-            // Petals dynamically switch shade
             root.style.setProperty('--petal-color', `hsl(${h}, ${s}%, ${isDark ? 30 : 82}%)`);
             root.style.setProperty('--petal-shadow', `hsla(${h}, ${s}%, ${isDark ? 30 : 82}%, 0.5)`);
 
             closeColorBar();
-            
             setTimeout(() => { triggerBlossoms(); }, 150);
         }
     </script>
