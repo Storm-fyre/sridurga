@@ -8,28 +8,23 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English&display=swap" rel="stylesheet">
     <style>
-        /* Modern CSS properties for smooth, dreamy background transitions */
-        @property --bg-1 { syntax: '<color>'; inherits: false; initial-value: #fce4ec; }
-        @property --bg-2 { syntax: '<color>'; inherits: false; initial-value: #f8bbd0; }
-        @property --bg-3 { syntax: '<color>'; inherits: false; initial-value: #ffeff1; }
-        @property --bg-4 { syntax: '<color>'; inherits: false; initial-value: #fff3e0; }
-        @property --text-color { syntax: '<color>'; inherits: true; initial-value: #5c3a4d; }
-        @property --text-secondary { syntax: '<color>'; inherits: true; initial-value: #7a5c6b; }
-        @property --accent-color { syntax: '<color>'; inherits: true; initial-value: #f08a9d; }
-        @property --shadow-color { syntax: '<color>'; inherits: true; initial-value: rgba(240, 138, 157, 0.2); }
-
         :root {
-            --bg-1: #fce4ec;
-            --bg-2: #f8bbd0;
-            --bg-3: #ffeff1;
-            --bg-4: #fff3e0;
-            
+            /* Base Theme Colors (Defaults to Original Pink) */
             --text-color: #5c3a4d;
             --text-secondary: #7a5c6b;
             --accent-color: #f08a9d;
-            
             --card-bg: rgba(255, 255, 255, 0.65);
             --shadow-color: rgba(240, 138, 157, 0.2);
+
+            /* Dynamic Background Gradient Variables */
+            --bg-grad-1: #fce4ec;
+            --bg-grad-2: #f8bbd0;
+            --bg-grad-3: #ffeff1;
+            --bg-grad-4: #fff3e0;
+
+            /* Dynamic Petal Variables */
+            --petal-color: #ffb7c5;
+            --petal-shadow: rgba(255, 183, 197, 0.5);
         }
 
         /* --- Living Sunset Background --- */
@@ -43,16 +38,21 @@
             align-items: center;
             min-height: 100vh;
             color: var(--text-color);
-            background: linear-gradient(-45deg, var(--bg-1), var(--bg-2), var(--bg-3), var(--bg-4));
+            background: linear-gradient(-45deg, var(--bg-grad-1), var(--bg-grad-2), var(--bg-grad-3), var(--bg-grad-4));
             background-size: 400% 400%;
             animation: breathe 15s ease infinite;
             overflow-x: hidden;
-            
-            /* The magic 2-second fade when a new color is typed */
-            transition: 
-                --bg-1 2s ease, --bg-2 2s ease, --bg-3 2s ease, --bg-4 2s ease,
-                --text-color 2s ease, --text-secondary 2s ease, 
-                --accent-color 2s ease, --shadow-color 2s ease;
+            transition: color 1.5s ease; /* Smooth text color changes */
+        }
+
+        /* Smooth background transitions for the gradient */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: inherit;
+            z-index: -1;
+            transition: background 1.5s ease;
         }
 
         @keyframes breathe {
@@ -91,6 +91,7 @@
             border: 1px solid rgba(255, 255, 255, 0.9);
             box-sizing: border-box;
             animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: box-shadow 1.5s ease;
         }
 
         .toast-card h2 {
@@ -101,6 +102,7 @@
             color: var(--text-color);
             letter-spacing: -0.5px;
             line-height: 1.4;
+            transition: color 1.5s ease;
         }
 
         .close-btn {
@@ -121,9 +123,76 @@
             transform: scale(1.1);
         }
 
-        @media (max-width: 480px) {
-            .toast-card h2 { font-size: 1.5rem; }
-            .toast-card { padding: 50px 25px; }
+        /* --- Color Input Bar Styles --- */
+        #color-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9998;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .color-bar {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            width: 90%;
+            max-width: 400px;
+            transform: translateY(20px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .color-bar input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: 1.2rem;
+            color: var(--text-color);
+            font-family: 'Segoe UI', sans-serif;
+            padding: 10px;
+        }
+
+        .color-bar input::placeholder {
+            color: rgba(0,0,0,0.3);
+        }
+
+        .color-go-btn {
+            background: var(--text-color);
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            padding: 8px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, background 1.5s ease;
+        }
+
+        .color-go-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .color-close-btn {
+            position: absolute;
+            top: -40px;
+            right: 10px;
+            font-size: 24px;
+            color: var(--text-color);
+            cursor: pointer;
+            font-weight: bold;
+            transition: color 1.5s ease;
         }
 
         @keyframes popIn {
@@ -142,6 +211,7 @@
             text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.6);
             position: relative;
             z-index: 10;
+            transition: color 1.5s ease;
         }
 
         .project-grid {
@@ -181,7 +251,7 @@
             font-size: 1.5rem;
             font-weight: 600;
             color: var(--text-color);
-            transition: color 2s ease;
+            transition: color 1.5s ease;
         }
 
         .footer {
@@ -193,6 +263,7 @@
             font-style: italic;
             position: relative;
             z-index: 10;
+            transition: color 1.5s ease;
         }
 
         /* --- Cherry Blossom Secret Styles --- */
@@ -210,9 +281,12 @@
         .petal {
             position: absolute;
             top: -10%;
+            background-color: var(--petal-color);
             border-radius: 15px 0 15px 0;
             opacity: 0.8;
+            box-shadow: 0 0 5px var(--petal-shadow);
             animation: fall linear forwards;
+            transition: background-color 1.5s ease, box-shadow 1.5s ease;
         }
 
         @keyframes fall {
@@ -223,11 +297,20 @@
 </head>
 <body>
 
-    <!-- Toast Component -->
+    <!-- Greeting Toast Component -->
     <div id="toast-overlay">
         <div class="toast-card">
             <span class="close-btn" onclick="closeToast()">&times;</span>
             <h2 id="toast-text">Loading...</h2>
+        </div>
+    </div>
+
+    <!-- The Secret Color Bar -->
+    <div id="color-overlay">
+        <div class="color-bar" id="color-bar">
+            <span class="color-close-btn" onclick="closeColorBar()">&times;</span>
+            <input type="text" id="color-input" placeholder="Type a colour (e.g. blue, #4287f5)" autocomplete="off">
+            <button class="color-go-btn" onclick="applyColorTheme()">Go</button>
         </div>
     </div>
 
@@ -256,14 +339,13 @@
     </div>
 
     <script>
-        // --- 1. The Rotating Uplifts (Selected Messages) ---
+        // --- 1. The Rotating Uplifts ---
         const uplifts =[
-            "Hope you're having a really good day, Sri.",
-            "Remember to take a quick break and grab some water!",
+            "Hope you're having a beautiful day, Sri.",
+            "Remember to take a break and hydrate!",
             "Just a little reminder that you're doing great.",
-            "Hope today brings you something to smile about.",
-            "Sending some good vibes your way today.",
-            "Just dropping by to say keep up the amazing work."
+            "Your projects are looking amazing as always.",
+            "Wishing you a day as wonderful as you are."
         ];
 
         const overlay = document.getElementById('toast-overlay');
@@ -294,77 +376,117 @@
             }
         });
 
-        // --- 3. The Magical Theme & Petals Typing Logic ---
-        let keyBuffer = '';
-        const MAX_BUFFER = 30;
+        // --- 3. Secret Code & Colour Trigger Logic ---
+        let keysPressed = '';
         const secretCode = 'silverisridurga';
-        
-        // Default classic pink for petals
-        let currentPetalColor = '#ffb7c5'; 
-
-        // The Massive Vibe & Color Dictionary
-        const themeDict = {
-            "matcha": "#c5d8a4", "mocha": "#785038", "ocean": "#006994", "barbie": "#e0218a",
-            "hacker": "#00ff00", "dracula": "#800000", "ghost": "#e6e6e6", "alien": "#39ff14",
-            "midnight": "#191970", "sunset": "#fd5e53", "forest": "#228b22", "chai": "#d7c0a9",
-            "espresso": "#4b3621", "cherry": "#ffb7c5", "peach": "#ffcda2", "lavender": "#e6e6fa",
-            "bubblegum": "#ffc1cc", "crimson": "#dc143c", "gold": "#ffd700", "silver": "#c0c0c0",
-            "teal": "#008080", "indigo": "#4b0082", "violet": "#ee82ee", "pink": "#ffb7c5",
-            "purple": "#800080", "blue": "#0000ff", "red": "#ff0000", "green": "#008000",
-            "yellow": "#ffff00", "orange": "#ffa500", "black": "#000000", "white": "#ffffff",
-            "grey": "#808080", "gray": "#808080", "cyan": "#00ffff", "magenta": "#ff00ff",
-            "brown": "#a52a2a", "maroon": "#800000", "navy": "#000080", "coral": "#ff7f50",
-            "plum": "#dda0dd", "salmon": "#fa8072", "tomato": "#ff6347", "turquoise": "#40e0d0"
-        };
-        const themeWords = Object.keys(themeDict);
+        const colorTriggers =['colour', 'color'];
 
         window.addEventListener('keydown', (e) => {
-            // Ignore if modifier keys are pressed
-            if (e.metaKey || e.ctrlKey || e.altKey) return;
-            
-            // Only capture letters
+            // Stop listening to background typing if the color bar is already open
+            if (document.getElementById('color-overlay').style.display === 'flex') return;
+
+            // Only track letters/numbers to avoid tracking shifts/controls
             if (e.key.length === 1) {
-                keyBuffer += e.key.toLowerCase();
+                keysPressed += e.key.toLowerCase();
             }
             
-            // Keep buffer length manageable
-            if (keyBuffer.length > MAX_BUFFER) {
-                keyBuffer = keyBuffer.slice(-MAX_BUFFER);
+            // Keep the tracker string capped at 15 (length of silverisridurga)
+            if (keysPressed.length > 15) {
+                keysPressed = keysPressed.slice(-15);
             }
 
-            // Trigger #1: The Petal Code
-            if (keyBuffer.endsWith(secretCode)) {
+            // Check for blossoms trigger
+            if (keysPressed === secretCode) {
                 triggerBlossoms();
-                keyBuffer = ''; 
-                return;
-            }
-
-            // Trigger #2: The Hidden Colors
-            for (let word of themeWords) {
-                if (keyBuffer.endsWith(word)) {
-                    applyTheme(themeDict[word]);
-                    keyBuffer = ''; // Reset so they can type another color seamlessly
-                    break;
-                }
+                keysPressed = ''; 
+            } 
+            // Check for colour bar triggers
+            else if (keysPressed.endsWith(colorTriggers[0]) || keysPressed.endsWith(colorTriggers[1])) {
+                openColorBar();
+                keysPressed = '';
             }
         });
 
-        // --- 4. The Color Math & Theming Logic ---
-        function hexToRgb(hex) {
-            let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? {
-                r: parseInt(result[1], 16),
-                g: parseInt(result[2], 16),
-                b: parseInt(result[3], 16)
-            } : null;
+        // --- 4. Petal System ---
+        function triggerBlossoms() {
+            const container = document.getElementById('blossom-container');
+            
+            for(let i = 0; i < 40; i++) {
+                setTimeout(() => {
+                    const petal = document.createElement('div');
+                    petal.classList.add('petal');
+                    
+                    const size = Math.random() * 12 + 10; 
+                    petal.style.width = `${size}px`;
+                    petal.style.height = `${size}px`;
+                    petal.style.left = `${Math.random() * 100}vw`;
+                    petal.style.animationDuration = `${Math.random() * 3 + 4}s`; 
+                    
+                    container.appendChild(petal);
+                    
+                    setTimeout(() => {
+                        petal.remove();
+                    }, 8000); 
+
+                }, i * 150);
+            }
         }
 
+        // --- 5. Dynamic Colour Theming System ---
+        const colorOverlay = document.getElementById('color-overlay');
+        const colorBar = document.getElementById('color-bar');
+        const colorInput = document.getElementById('color-input');
+
+        function openColorBar() {
+            colorOverlay.style.display = 'flex';
+            // Slight delay to allow display:flex to apply before animating opacity
+            setTimeout(() => {
+                colorOverlay.style.opacity = '1';
+                colorBar.style.transform = 'translateY(0)';
+                colorInput.value = '';
+                colorInput.focus();
+            }, 10);
+        }
+
+        function closeColorBar() {
+            colorOverlay.style.opacity = '0';
+            colorBar.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                colorOverlay.style.display = 'none';
+            }, 400);
+        }
+
+        // Allow pressing Enter to submit color
+        colorInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                applyColorTheme();
+            }
+        });
+
+        // Convert the string (like "red" or "cornflowerblue") to RGB using the browser's engine
+        function getRGBFromColorString(colorStr) {
+            const temp = document.createElement('div');
+            temp.style.color = '#000000'; // Set to black first
+            temp.style.color = colorStr;  // Apply user color
+            temp.style.display = 'none';
+            document.body.appendChild(temp);
+            
+            const computedColor = window.getComputedStyle(temp).color;
+            document.body.removeChild(temp);
+            
+            const match = computedColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+            if(!match) return null; 
+            return[parseInt(match[1]), parseInt(match[2]), parseInt(match[3])];
+        }
+
+        // Math to convert RGB to HSL for perfect shading
         function rgbToHsl(r, g, b) {
             r /= 255; g /= 255; b /= 255;
             let max = Math.max(r, g, b), min = Math.min(r, g, b);
             let h, s, l = (max + min) / 2;
-            if (max == min) {
-                h = s = 0; // Achromatic (greys/blacks)
+
+            if(max === min) {
+                h = s = 0; 
             } else {
                 let d = max - min;
                 s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
@@ -375,62 +497,47 @@
                 }
                 h /= 6;
             }
-            return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+            return[h * 360, s * 100, l * 100];
         }
 
-        function applyTheme(hex) {
-            const rgb = hexToRgb(hex);
-            if (!rgb) return;
-            const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
-            
+        function applyColorTheme() {
+            let inputColor = colorInput.value.trim();
+            if(!inputColor) return closeColorBar();
+
+            const rgb = getRGBFromColorString(inputColor);
+            if(!rgb) return closeColorBar(); // If completely invalid, just close
+
+            // Get the HSL values of whatever they typed
+            let[h, s, l] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+
+            // Adjust the CSS variables to create the perfectly balanced theme
             const root = document.documentElement;
             
-            // Generate a perfectly aesthetic, readable monochromatic palette dynamically
-            // For background: always keep lightness very high so dark text remains readable
-            root.style.setProperty('--bg-1', `hsl(${hsl.h}, ${hsl.s}%, 95%)`);
-            root.style.setProperty('--bg-2', `hsl(${hsl.h}, ${hsl.s}%, 85%)`);
-            root.style.setProperty('--bg-3', `hsl(${hsl.h}, ${hsl.s}%, 90%)`);
-            root.style.setProperty('--bg-4', `hsl(${hsl.h}, ${hsl.s}%, 97%)`);
+            // Text needs to be dark for readability (Lightness: 20-35%)
+            root.style.setProperty('--text-color', `hsl(${h}, ${s}%, 20%)`);
+            root.style.setProperty('--text-secondary', `hsl(${h}, ${s}%, 35%)`);
             
-            // For text: force high saturation if color was grey, force low lightness so it stands out
-            root.style.setProperty('--text-color', `hsl(${hsl.h}, ${Math.max(hsl.s, 30)}%, 20%)`);
-            root.style.setProperty('--text-secondary', `hsl(${hsl.h}, ${Math.max(hsl.s, 20)}%, 40%)`);
+            // Accents and Shadows
+            root.style.setProperty('--accent-color', `hsl(${h}, ${s}%, 65%)`);
+            root.style.setProperty('--shadow-color', `hsla(${h}, ${s}%, 60%, 0.3)`);
             
-            // Accents & shadows perfectly map to the requested hue
-            root.style.setProperty('--accent-color', `hsl(${hsl.h}, ${hsl.s}%, 60%)`);
-            root.style.setProperty('--shadow-color', `hsla(${hsl.h}, ${hsl.s}%, 60%, 0.3)`);
+            // Background Gradient uses 4 super light/pastel shades (Lightness: 88-96%)
+            root.style.setProperty('--bg-grad-1', `hsl(${h}, ${s}%, 94%)`);
+            root.style.setProperty('--bg-grad-2', `hsl(${h}, ${s}%, 88%)`);
+            root.style.setProperty('--bg-grad-3', `hsl(${h}, ${s}%, 96%)`);
+            root.style.setProperty('--bg-grad-4', `hsl(${h}, ${s}%, 91%)`);
             
-            // Update the global petal color to match the new aesthetic!
-            // We use a mid-high lightness to make it look like a real leaf/petal
-            currentPetalColor = `hsl(${hsl.h}, ${hsl.s}%, 75%)`;
-        }
+            // Petals use a highly visible pastel tone (Lightness: 82%)
+            root.style.setProperty('--petal-color', `hsl(${h}, ${s}%, 82%)`);
+            root.style.setProperty('--petal-shadow', `hsla(${h}, ${s}%, 82%, 0.5)`);
 
-        function triggerBlossoms() {
-            const container = document.getElementById('blossom-container');
+            // Close the bar and celebrate with new petals!
+            closeColorBar();
             
-            for(let i = 0; i < 40; i++) {
-                setTimeout(() => {
-                    const petal = document.createElement('div');
-                    petal.classList.add('petal');
-                    
-                    // Chameleon petals! They now match the dynamic theme
-                    petal.style.backgroundColor = currentPetalColor;
-                    petal.style.boxShadow = `0 0 5px ${currentPetalColor}`;
-                    
-                    const size = Math.random() * 12 + 10;
-                    petal.style.width = `${size}px`;
-                    petal.style.height = `${size}px`;
-                    petal.style.left = `${Math.random() * 100}vw`;
-                    petal.style.animationDuration = `${Math.random() * 3 + 4}s`;
-                    
-                    container.appendChild(petal);
-                    
-                    setTimeout(() => {
-                        petal.remove();
-                    }, 8000); 
-
-                }, i * 150);
-            }
+            // Small delay so the petals drop as the background starts fading to the new color
+            setTimeout(() => {
+                triggerBlossoms();
+            }, 300);
         }
     </script>
 </body>
