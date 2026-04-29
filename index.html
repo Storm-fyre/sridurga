@@ -27,7 +27,7 @@
             --petal-shadow: rgba(255, 183, 197, 0.5);
         }
 
-        /* --- Living Sunset Background --- */
+        /* --- Living Sunset Background (Restored exactly to original smoothness) --- */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
@@ -42,17 +42,7 @@
             background-size: 400% 400%;
             animation: breathe 15s ease infinite;
             overflow-x: hidden;
-            transition: color 1.5s ease; /* Smooth text color changes */
-        }
-
-        /* Smooth background transitions for the gradient */
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: inherit;
-            z-index: -1;
-            transition: background 1.5s ease;
+            transition: color 1.5s ease; /* Smooth text color changes only */
         }
 
         @keyframes breathe {
@@ -158,14 +148,15 @@
             background: transparent;
             border: none;
             outline: none;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: var(--text-color);
             font-family: 'Segoe UI', sans-serif;
             padding: 10px;
         }
 
         .color-bar input::placeholder {
-            color: rgba(0,0,0,0.3);
+            color: rgba(0,0,0,0.4);
+            font-size: 1rem;
         }
 
         .color-go-btn {
@@ -309,7 +300,7 @@
     <div id="color-overlay">
         <div class="color-bar" id="color-bar">
             <span class="color-close-btn" onclick="closeColorBar()">&times;</span>
-            <input type="text" id="color-input" placeholder="Type a colour (e.g. blue, #4287f5)" autocomplete="off">
+            <input type="text" id="color-input" placeholder="Type a colour name or Hex color code" autocomplete="off">
             <button class="color-go-btn" onclick="applyColorTheme()">Go</button>
         </div>
     </div>
@@ -537,7 +528,7 @@
             // Small delay so the petals drop as the background starts fading to the new color
             setTimeout(() => {
                 triggerBlossoms();
-            }, 300);
+            }, 150);
         }
     </script>
 </body>
