@@ -186,13 +186,13 @@
             transition: color 1.5s ease;
         }
 
-        /* Polite Error Popup */
+        /* Polite Error Popup & Suggestions */
         .color-error-msg {
             position: absolute;
             bottom: -45px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             color: var(--text-color);
             padding: 8px 18px;
             border-radius: 15px;
@@ -201,9 +201,23 @@
             box-shadow: 0 5px 15px var(--shadow-color);
             border: 1px solid rgba(255, 255, 255, 0.8);
             opacity: 0;
-            pointer-events: none;
+            pointer-events: none; /* Changed dynamically in JS */
             transition: opacity 0.3s ease;
             white-space: nowrap;
+        }
+
+        .suggestion-link {
+            font-weight: 700;
+            color: var(--accent-color);
+            cursor: pointer;
+            text-decoration: underline;
+            text-decoration-thickness: 2px;
+            text-underline-offset: 3px;
+            transition: color 0.2s ease;
+        }
+
+        .suggestion-link:hover {
+            color: var(--text-color);
         }
 
         @keyframes popIn {
@@ -451,6 +465,7 @@
                 colorBar.style.transform = 'translateY(0)';
                 colorInput.value = '';
                 errorMsg.style.opacity = '0'; // Hide error if opening fresh
+                errorMsg.style.pointerEvents = 'none';
                 colorInput.focus();
             }, 10);
         }
@@ -463,19 +478,99 @@
             }, 400);
         }
 
-        function showPoliteError() {
-            errorMsg.style.opacity = '1';
-            colorInput.select(); // Highlight text to type over it immediately
+        // Hide error immediately if they start typing again to self-correct
+        colorInput.addEventListener('input', () => {
+            errorMsg.style.opacity = '0';
+            errorMsg.style.pointerEvents = 'none';
+        });
+
+        // New Polite Error function that supports clickable suggestions
+        function showPoliteError(suggestion = null) {
+            colorInput.select(); // Highlight text to type over it
             
-            if(errorTimeout) clearTimeout(errorTimeout);
-            errorTimeout = setTimeout(() => {
-                errorMsg.style.opacity = '0';
-            }, 2000);
+            if (suggestion) {
+                errorMsg.innerHTML = `Did you mean '<span class="suggestion-link" onclick="applySuggestion('${suggestion}')">${suggestion}</span>'?`;
+                errorMsg.style.pointerEvents = 'auto'; // Make it clickable!
+                
+                // 5 second timer for suggestions
+                if(errorTimeout) clearTimeout(errorTimeout);
+                errorTimeout = setTimeout(() => {
+                    errorMsg.style.opacity = '0';
+                    errorMsg.style.pointerEvents = 'none';
+                }, 5000);
+            } else {
+                errorMsg.innerHTML = "I don't know that colour! Try another?";
+                errorMsg.style.pointerEvents = 'none';
+                
+                // 2 second timer for standard errors
+                if(errorTimeout) clearTimeout(errorTimeout);
+                errorTimeout = setTimeout(() => {
+                    errorMsg.style.opacity = '0';
+                }, 2000);
+            }
+
+            errorMsg.style.opacity = '1';
+        }
+
+        // Called when the user clicks the suggestion span
+        function applySuggestion(suggestion) {
+            colorInput.value = suggestion;
+            applyColorTheme();
         }
 
         colorInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') applyColorTheme();
         });
+
+        // --- Levenshtein Distance Algorithm (Spell Checker) ---
+        function getLevenshteinDistance(a, b) {
+            const matrix =[];
+            for (let i = 0; i <= b.length; i++) {
+                matrix[i] = [i];
+            }
+            for (let j = 0; j <= a.length; j++) {
+                matrix[0][j] = j;
+            }
+            for (let i = 1; i <= b.length; i++) {
+                for (let j = 1; j <= a.length; j++) {
+                    if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1, // substitution
+                            matrix[i][j - 1] + 1,     // insertion
+                            matrix[i - 1][j] + 1      // deletion
+                        );
+                    }
+                }
+            }
+            return matrix[b.length][a.length];
+        }
+
+        // Scans dictionary to find the closest match within 2 edits
+        function findNearestColor(inputStr) {
+            let query = inputStr.trim().toLowerCase().replace(/\s+/g, '');
+            let bestMatch = null;
+            let minDistance = 3; // Threshold: max 2 edits allowed
+            
+            // Standard fallback colors in case dictionary doesn't load fully
+            const standardColors =['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown', 'black', 'white', 'gray', 'grey', 'cyan', 'magenta', 'crimson', 'fuchsia'];
+            
+            let colorKeys = standardColors;
+            // Add custom dictionary colors if the file loaded successfully
+            if (window.extendedColors) {
+                colorKeys = [...new Set([...standardColors, ...Object.keys(window.extendedColors)])];
+            }
+
+            for (let color of colorKeys) {
+                let dist = getLevenshteinDistance(query, color);
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    bestMatch = color;
+                }
+            }
+            return bestMatch;
+        }
 
         // The Ultimate Resolver: Evaluates Hex -> Custom Dictionary -> Standard CSS
         function resolveColorToRGB(inputStr) {
@@ -542,7 +637,15 @@
             let inputColor = colorInput.value;
             const rgb = resolveColorToRGB(inputColor);
             
-            if(!rgb) return showPoliteError();
+            if(!rgb) {
+                // If invalid, try to find a suggestion
+                const suggestion = findNearestColor(inputColor);
+                return showPoliteError(suggestion);
+            }
+
+            // If valid color is found, hide errors and apply theme
+            errorMsg.style.opacity = '0';
+            errorMsg.style.pointerEvents = 'none';
 
             let[h, s, l] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
 
