@@ -312,34 +312,46 @@
 
     <h1>Sri's Stuff</h1>
 
-    <div class="project-grid">
-        <a href="https://geogle.storm-fyre.workers.dev/" class="card" target="_blank">
-            <div class="card-title">Geogle</div>
-        </a>
-        <a href="https://storm-fyre.github.io/silversolver/" class="card" target="_blank">
-            <div class="card-title">Silver Solver</div>
-        </a>
-        <a href="https://storm-fyre.github.io/export-tradle/" class="card" target="_blank">
-            <div class="card-title">Stromfyre's Tradle</div>
-        </a>
-        <a href="https://storm-fyre.github.io/drawfast/" class="card" target="_blank">
-            <div class="card-title">Drawfast</div>
-        </a>
-    </div>
+    <!-- Dynamically populated from projects.js -->
+    <div class="project-grid" id="project-grid"></div>
 
     <div class="footer">
         Just a little corner of the web for you.
     </div>
 
-    <!-- Load our massive dictionary file! -->
+    <!-- Load our configuration and dictionary files -->
+    <script src="projects.js"></script>
     <script src="colors.js"></script>
 
     <script>
+        // --- Render Projects Grid Dynamically ---
+        function renderProjects() {
+            const grid = document.getElementById('project-grid');
+            if (!grid || !window.projectsData) return;
+
+            grid.innerHTML = '';
+            window.projectsData.forEach(project => {
+                const card = document.createElement('a');
+                card.className = 'card';
+                card.href = project.url;
+                card.target = '_blank';
+                card.rel = 'noopener noreferrer';
+
+                const title = document.createElement('div');
+                title.className = 'card-title';
+                title.textContent = project.title;
+
+                card.appendChild(title);
+                grid.appendChild(card);
+            });
+        }
+        renderProjects();
+
         // --- State Management ---
         let currentThemeMode = 'default'; // 'default', 'interstellar', 'phm'
 
         // --- 1. The Rotating Uplifts ---
-        const uplifts =[
+        const uplifts = [
             "Hope you're having a beautiful day, Sri.",
             "Remember to take a break and hydrate!",
             "Just a little reminder that you're doing great.",
@@ -378,7 +390,7 @@
         // --- 3. Secret Code & Theme Trigger Logic ---
         let keysPressed = '';
         const secretCode = 'silverisridurga';
-        const themeTriggers =['theme', 'themes']; // Updated to 'theme/themes'
+        const themeTriggers = ['theme', 'themes'];
 
         window.addEventListener('keydown', (e) => {
             if (document.getElementById('color-overlay').style.display === 'flex') return;
@@ -521,7 +533,7 @@
         });
 
         function getLevenshteinDistance(a, b) {
-            const matrix =[];
+            const matrix = [];
             for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
             for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
             for (let i = 1; i <= b.length; i++) {
@@ -545,8 +557,7 @@
             let bestMatch = null;
             let minDistance = 3; 
             
-            // Themes included natively so the spell checker knows them!
-            const standardThemesAndColors =['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown', 'black', 'white', 'gray', 'grey', 'cyan', 'magenta', 'crimson', 'fuchsia', 'silver', 'interstellar', 'project hail mary'];
+            const standardThemesAndColors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown', 'black', 'white', 'gray', 'grey', 'cyan', 'magenta', 'crimson', 'fuchsia', 'silver', 'interstellar', 'project hail mary'];
             
             let colorKeys = standardThemesAndColors;
             if (window.extendedColors) {
@@ -588,7 +599,7 @@
             if (computedColor === 'rgb(1, 2, 3)' && colorStr.replace(/\s/g, '') !== 'rgb(1,2,3)') return null;
             const match = computedColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
             if(!match) return null; 
-            return[parseInt(match[1]), parseInt(match[2]), parseInt(match[3])];
+            return [parseInt(match[1]), parseInt(match[2]), parseInt(match[3])];
         }
 
         function rgbToHsl(r, g, b) {
@@ -606,14 +617,14 @@
                 }
                 h /= 6;
             }
-            return[h * 360, s * 100, l * 100];
+            return [h * 360, s * 100, l * 100];
         }
 
         // --- 6. Theming Application Engine ---
         function applyCinematicTheme(mode) {
             const root = document.documentElement;
             const bgContainer = document.getElementById('cinematic-bg');
-            bgContainer.innerHTML = ''; // Clear previous
+            bgContainer.innerHTML = ''; 
 
             if (mode === 'interstellar') {
                 currentThemeMode = 'interstellar';
@@ -686,7 +697,6 @@
             bgContainer.innerHTML = '';
             bgContainer.style.background = 'transparent';
             
-            // Re-apply standard gradient mechanics
             document.body.style.background = 'linear-gradient(-45deg, var(--bg-grad-1), var(--bg-grad-2), var(--bg-grad-3), var(--bg-grad-4))';
             document.body.style.backgroundSize = '400% 400%';
         }
@@ -717,7 +727,6 @@
             const rgb = resolveColorToRGB(inputColor);
             
             if(!rgb) {
-                // If RGB fails, trigger our spell checker!
                 const suggestion = findNearestColor(inputColor);
                 return showPoliteError(suggestion);
             }
@@ -725,12 +734,11 @@
             errorMsg.style.opacity = '0';
             errorMsg.style.pointerEvents = 'none';
 
-            // Clean up any cinematic elements and restore base background rules
             if (currentThemeMode !== 'default') {
                 restoreDefaultBackground();
             }
 
-            let[h, s, l] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+            let [h, s, l] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
             const root = document.documentElement;
             const isDark = l < 50; 
             
