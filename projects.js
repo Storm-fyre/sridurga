@@ -23,5 +23,9 @@ window.projectsData = [
     {
         title: "CArtle",
         url: "https://storm-fyre.github.io/CArtle/"
+    },
+    {
+        title: "BingeBebo",
+        url: "https://personal-stream.rakshann14.workers.dev/"
     }
 ];
