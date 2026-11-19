@@ -53,6 +53,7 @@
       letter-spacing: -0.035em;
       line-height: 1.05;
       background: linear-gradient(135deg, #141824 0%, #4338ca 100%);
+      background-clip: text;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -129,7 +130,7 @@
 
     .project-card:hover {
       transform: translateY(-5px) scale(1.01);
-      border-color: var(--card-accent);
+      border-color: var(--card-border);
       box-shadow: 0 14px 32px rgba(15, 23, 42, 0.09);
     }
 
@@ -138,7 +139,7 @@
     }
 
     .project-card:focus-visible {
-      outline: 2px solid var(--card-accent);
+      outline: 2px solid var(--card-border);
       outline-offset: 3px;
     }
 
@@ -165,7 +166,7 @@
       height: 28px;
       padding: 0 11px;
       background: var(--card-soft);
-      color: var(--card-accent);
+      color: var(--card-num-ink);
       border-radius: 999px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.76rem;
@@ -193,7 +194,7 @@
 
     .project-card:hover .card-arrow {
       background: var(--card-accent);
-      color: #ffffff;
+      color: var(--card-arrow-ink);
       transform: translate(2px, -2px) rotate(6deg);
     }
 
@@ -205,7 +206,7 @@
       color: #141824;
     }
 
-    /* Compact Inline Countdown Pill (Same 36px height as the arrow button) */
+    /* Compact Inline Countdown Pill */
     .countdown-pill {
       display: inline-flex;
       flex-direction: column;
@@ -271,76 +272,60 @@
       <h1 class="site-title">Projects</h1>
       <div class="live-badge">
         <span class="live-dot"></span>
-        <span id="liveCount">08 LIVE</span>
+        <span id="liveCount">-- LIVE</span>
       </div>
     </header>
 
     <main class="projects-grid" id="projectsGrid"></main>
   </div>
 
+  <script src="projects.js"></script>
   <script>
-    // =========================================================================
-    // 1. UPDATE YOUR REAL PROJECT NAMES, LINKS, AND BINGEBEBO SHUTDOWN TIME HERE
-    // =========================================================================
-    const BINGEBEBO_SHUTDOWN = '2026-11-26T17:00:00+05:30'; // Exact IST date/time
+    const projects = Array.isArray(window.projectsData) ? window.projectsData : [];
 
-    const PROJECTS = [
-      {
-        name: 'Project One', // Replace with your real 1st project name
-        url: 'https://example.com',
-        accent: '#3b82f6',
-        soft: '#eff6ff',
-      },
-      {
-        name: 'Mind Palace',
-        url: 'https://storm-fyre.github.io/Tachylite/',
-        accent: '#8b5cf6',
-        soft: '#f5f3ff',
-      },
-      {
-        name: "Stormfyre's Tradle",
-        url: 'https://example.com',
-        accent: '#10b981',
-        soft: '#ecfdf5',
-      },
-      {
-        name: 'Drawfast',
-        url: 'https://example.com',
-        accent: '#f97316',
-        soft: '#fff7ed',
-      },
-      {
-        name: 'CArtle',
-        url: 'https://example.com',
-        accent: '#ec4899',
-        soft: '#fdf2f8',
-      },
-      {
-        name: 'Orbit',
-        url: 'https://example.com',
-        accent: '#06b6d4',
-        soft: '#ecfeff',
-      },
-      {
-        name: 'Brainrot',
-        url: 'https://example.com',
-        accent: '#ca8a04',
-        soft: '#fefce8',
-      },
-      {
-        name: 'BingeBebo',
-        url: 'https://example.com',
-        accent: '#f43f5e',
-        soft: '#fff1f2',
-        shutdownAt: BINGEBEBO_SHUTDOWN,
-      },
-    ];
-
-    // =========================================================================
-    // 2. RENDERING & LIVE COUNTDOWN
-    // =========================================================================
     function pad2(n) {
       return String(n).padStart(2, '0');
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function isLightColor(hex) {
+      const clean = (hex || '').replace('#', '').trim();
+      if (clean.length !== 3 && clean.length !== 6) return false;
+      const full = clean.length === 3
+        ? clean.split('').map((c) => c + c).join('')
+        : clean;
+      const r = parseInt(full.slice(0, 2), 16);
+      const g = parseInt(full.slice(2, 4), 16);
+      const b = parseInt(full.slice(4, 6), 16);
+      return (r * 299 + g * 587 + b * 114) / 1000 > 160;
+    }
+
+    function getCardThemeStyle(accent) {
+      const color = accent || '#6366f1';
+      if (isLightColor(color)) {
+        return [
+          `--card-accent:${color}`,
+          `--card-soft:color-mix(in srgb, ${color} 40%, #ffffff)`,
+          `--card-num-ink:color-mix(in srgb, ${color} 32%, #141824)`,
+          `--card-border:color-mix(in srgb, ${color} 85%, #141824)`,
+          `--card-arrow-ink:#141824`,
+        ].join('; ');
+      }
+      return [
+        `--card-accent:${color}`,
+        `--card-soft:color-mix(in srgb, ${color} 12%, #ffffff)`,
+        `--card-num-ink:${color}`,
+        `--card-border:${color}`,
+        `--card-arrow-ink:#ffffff`,
+      ].join('; ');
     }
 
     function formatCountdown(ms) {
@@ -354,16 +339,25 @@
 
     function renderGrid() {
       const grid = document.getElementById('projectsGrid');
-      grid.innerHTML = PROJECTS.map((p, index) => {
+      grid.innerHTML = projects.map((project, index) => {
         const num = pad2(index + 1);
-        const countdownMarkup = p.shutdownAt
+        const title = escapeHtml(project.title);
+        const upperTitle = escapeHtml((project.title || '').toUpperCase());
+        const url = escapeHtml(project.url);
+        const styleAttr = escapeHtml(getCardThemeStyle(project.accent));
+
+        const countdownMarkup = project.expiresAt
           ? `
-            <span class="countdown-pill" id="bingePill">
+            <span
+              class="countdown-pill"
+              data-expires-at="${escapeHtml(project.expiresAt)}"
+              data-project-name="${upperTitle}"
+            >
               <span class="countdown-label">
                 <span class="countdown-dot"></span>
-                <span id="bingeLabel">BINGEBEBO GOES DOWN IN</span>
+                <span class="countdown-label-text">${upperTitle} GOES DOWN IN</span>
               </span>
-              <span class="countdown-time" id="bingeTimer">--</span>
+              <span class="countdown-time">--</span>
             </span>
           `
           : '';
@@ -371,10 +365,10 @@
         return `
           <a
             class="project-card"
-            href="${p.url}"
+            href="${url}"
             target="_blank"
             rel="noopener noreferrer"
-            style="--card-accent:${p.accent}; --card-soft:${p.soft};"
+            style="${styleAttr}"
           >
             <div class="card-top">
               <div class="card-top-left">
@@ -383,38 +377,44 @@
               </div>
               <span class="card-arrow" aria-hidden="true">↗</span>
             </div>
-            <h2 class="card-title">${p.name}</h2>
+            <h2 class="card-title">${title}</h2>
           </a>
         `;
       }).join('');
     }
 
-    function updateCountdown() {
-      const targetMs = new Date(BINGEBEBO_SHUTDOWN).getTime();
-      const remaining = targetMs - Date.now();
-      const pill = document.getElementById('bingePill');
-      const label = document.getElementById('bingeLabel');
-      const timer = document.getElementById('bingeTimer');
+    function updateCountdowns() {
+      const pills = document.querySelectorAll('.countdown-pill[data-expires-at]');
+      let offlineCount = 0;
+
+      pills.forEach((pill) => {
+        const targetMs = new Date(pill.dataset.expiresAt).getTime();
+        const remaining = targetMs - Date.now();
+        const label = pill.querySelector('.countdown-label-text');
+        const timer = pill.querySelector('.countdown-time');
+        const name = pill.dataset.projectName;
+
+        if (remaining <= 0) {
+          offlineCount++;
+          pill.classList.add('is-offline');
+          label.textContent = 'STATUS';
+          timer.textContent = `${name} OFFLINE`;
+        } else {
+          pill.classList.remove('is-offline');
+          label.textContent = `${name} GOES DOWN IN`;
+          timer.textContent = formatCountdown(remaining);
+        }
+      });
+
       const liveBadge = document.getElementById('liveCount');
-
-      if (!pill || !label || !timer) return;
-
-      if (remaining <= 0) {
-        pill.classList.add('is-offline');
-        label.textContent = 'STATUS';
-        timer.textContent = 'BINGEBEBO OFFLINE';
-        if (liveBadge) liveBadge.textContent = `${pad2(PROJECTS.length - 1)} LIVE`;
-      } else {
-        pill.classList.remove('is-offline');
-        label.textContent = 'BINGEBEBO GOES DOWN IN';
-        timer.textContent = formatCountdown(remaining);
-        if (liveBadge) liveBadge.textContent = `${pad2(PROJECTS.length)} LIVE`;
+      if (liveBadge) {
+        liveBadge.textContent = `${pad2(projects.length - offlineCount)} LIVE`;
       }
     }
 
     renderGrid();
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
+    updateCountdowns();
+    setInterval(updateCountdowns, 1000);
   </script>
 </body>
 </html>
